@@ -12,6 +12,16 @@ import (
 	pb "github.com/hyperledger/fabric-protos-go/peer"
 )
 
+var testProposal *TransactionProposal
+
+func SetTestProposal(a *TransactionProposal) {
+	testProposal = a
+}
+
+func GetTestProposal() *TransactionProposal {
+	return testProposal
+}
+
 // ProposalProcessor simulates transaction proposal, so that a client can submit the result for ordering.
 type ProposalProcessor interface {
 	ProcessTransactionProposal(reqContext.Context, ProcessProposalRequest) (*TransactionProposalResponse, error)

@@ -31,11 +31,12 @@ func TeeTx() {
 		return
 	}
 
+	logger.Info("put data into tee")
 	put, err := teeCli.Put(key, value)
 	if err != nil {
 		return
 	}
-	fmt.Println("tee post: ", put)
+	logger.Info("tee post: ", put)
 
 	clientChannelContext := sdk.ChannelContext(channelID, fabsdk.WithUser(orgUser), fabsdk.WithOrg(OrgName))
 
@@ -45,6 +46,7 @@ func TeeTx() {
 		return
 	}
 
+	logger.Info("put the tee's key on the chain")
 	request := channel.Request{
 		ChaincodeID: chaincoodeID,
 		Fcn:         setArgs[0],
@@ -56,7 +58,7 @@ func TeeTx() {
 		logger.Error(err)
 		return
 	}
-	logger.Info(" sacc response: ", string(response.Payload))
+	logger.Info(" sacc response: ", string(response.TransactionID))
 
 	res, err := teeCli.Get(key)
 	if err != nil {

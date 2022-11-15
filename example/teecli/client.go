@@ -63,7 +63,7 @@ type KeyPair struct {
 }
 
 func (tc Client) Get(key string) (*KeyPair, error) {
-	reqBody := map[string]any{
+	reqBody := map[string]interface{}{
 		"key": key,
 	}
 	bodyBytes, err := json.Marshal(reqBody)
@@ -79,7 +79,7 @@ func (tc Client) Get(key string) (*KeyPair, error) {
 }
 
 func (tc Client) Put(key, value string) (*KeyPair, error) {
-	reqBody := map[string]any{
+	reqBody := map[string]interface{}{
 		"key":   key,
 		"value": value,
 	}

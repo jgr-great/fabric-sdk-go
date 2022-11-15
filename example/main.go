@@ -7,5 +7,5 @@ import (
 var logger = logging.NewLogger("example")
 
 func main() {
-	zkTx()
+	ZkTx()
 }

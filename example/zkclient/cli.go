@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/hyperledger/fabric-sdk-go/pkg/common/logging"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -14,8 +15,10 @@ import (
 )
 
 var (
+	logger = logging.NewLogger("zk")
+
 	UserAddress = "0x71c7656ec7ab88b098defb751b7401b5f6d8976f"
-	timeout     = time.Second * 60
+	timeout     = time.Second * 120
 )
 
 type Client struct {
@@ -31,7 +34,7 @@ func NewClient(addr string) (*Client, error) {
 	return &Client{addr}, nil
 }
 
-func (zk Client) doReq(thisUrl string, reqBody []byte) (map[string]any, error) {
+func (zk Client) doReq(thisUrl string, reqBody []byte) (map[string]interface{}, error) {
 
 	req, err := http.NewRequest(http.MethodPost, thisUrl, bytes.NewBuffer(reqBody))
 	if err != nil {
@@ -52,7 +55,7 @@ func (zk Client) doReq(thisUrl string, reqBody []byte) (map[string]any, error) {
 	if err != nil {
 		return nil, errors.WithMessagef(err, "failed to read response body for init account")
 	}
-	respMap := map[string]any{}
+	respMap := map[string]interface{}{}
 	if err = json.Unmarshal(respBody, &respMap); err != nil {
 		return nil, errors.WithMessagef(err, "failed to get map from bytes")
 	}
@@ -60,7 +63,7 @@ func (zk Client) doReq(thisUrl string, reqBody []byte) (map[string]any, error) {
 }
 
 func (zk Client) InitAccount(initValue int) error {
-	reqBody := map[string]any{
+	reqBody := map[string]interface{}{
 		"initvalue": initValue,
 	}
 	bodyBytes, err := json.Marshal(reqBody)
@@ -102,10 +105,13 @@ func (zk Client) SendZkTx(tx ZkTx) (*VerifiedDoc, error) {
 	if err != nil {
 		return nil, errors.WithMessagef(err, "josn cannot marshal")
 	}
-
-	if v, ok := respMap["SNSN"]; !ok || fmt.Sprintf("%v", v) == "" {
-		return nil, errors.Errorf("not contain SNSN in response")
+	logger.Info("get zk response", respMap)
+	if v, ok := respMap["status"]; ok && fmt.Sprintf("%v", v) == "0" {
+		return nil, errors.Errorf("%s,failed to send zk tx", respMap["msg"])
 	}
+	//if v, ok := respMap["SNSN"]; !ok || fmt.Sprintf("%v", v) == "" {
+	//	return nil, errors.Errorf("not contain SNSN in response")
+	//}
 	if v, ok := respMap["SNCMTOld"]; !ok || fmt.Sprintf("%v", v) == "" {
 		return nil, errors.Errorf("not contain SNCMTOld in response")
 	}

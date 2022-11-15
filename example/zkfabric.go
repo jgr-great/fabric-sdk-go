@@ -8,21 +8,24 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 )
 
-func zkTx() {
+func ZkTx() {
 	var (
 		err          error
 		configFile   = "./fixtures/example-org1.yaml"
-		channelID    = "mychannel2"
+		channelID    = "mychannel"
 		orgUser      = "User1"
+		userAAdress  = "0x71c7656ec7ab88b098defb751b7401b5f6d8976f"
 		OrgName      = "org1"
-		chaincoodeID = "basic"
+		chaincoodeID = "abstore"
 		setArgs      = []string{"invoke", "userA", "userB", "5"}
 	)
+	logger.Info("init zk client")
 	zkCli, err := zkclient.NewClient("http://101.251.223.190:8888")
 	if err != nil {
 		logger.Error(err)
 		return
 	}
+	logger.Info("new fabric client")
 	sdk, err := fabsdk.New(config.FromFile(configFile))
 	if err != nil {
 		logger.Error(err)
@@ -35,6 +38,7 @@ func zkTx() {
 		logger.Error(err)
 		return
 	}
+	logger.Info("register userA")
 	//register user
 	request := channel.Request{
 		ChaincodeID: chaincoodeID,
@@ -47,8 +51,8 @@ func zkTx() {
 		logger.Error(err)
 		return
 	}
-	logger.Info("response: ", string(response.Payload))
-
+	logger.Info("response: ", string(response.TransactionID))
+	logger.Info("register userB")
 	request = channel.Request{
 		ChaincodeID: chaincoodeID,
 		Fcn:         "addUser",
@@ -60,8 +64,10 @@ func zkTx() {
 		logger.Error(err)
 		return
 	}
-	logger.Info("response: ", string(response.Payload))
+	txID := response.TransactionID
+	logger.Info("fabric response: ", string(response.TransactionID))
 
+	logger.Info("userA transfer 5 token to userB")
 	request = channel.Request{
 		ChaincodeID: chaincoodeID,
 		Fcn:         setArgs[0],
@@ -73,29 +79,34 @@ func zkTx() {
 		logger.Error(err)
 		return
 	}
-	logger.Info("response: ", string(response.Payload))
+	logger.Info("fabric response: ", string(response.TransactionID))
 
 	// init zk account for userA
+	logger.Info("init zk account for userA")
 	err = zkCli.InitAccount(100)
 	if err != nil {
+		logger.Error("zk InitAccount error", err)
 		return
 	}
 	// generate proof for userA
+	logger.Info("send zk tx for userA")
 	tx, err := zkCli.SendZkTx(zkclient.ZkTx{
-		From:       "userA",
-		ValueTrans: 100,
-		ValueNew:   10,
+		From:       userAAdress,
+		ValueTrans: 5,
+		ValueNew:   95,
 	})
 	if err != nil {
+		logger.Error("zk SendZkTx error", err)
 		return
 	}
-
+	logger.Info("zk response", tx)
 	dataByte, _ := json.Marshal(tx)
 
+	logger.Info("save zk proof for userA, record tx id and zk proof")
 	request = channel.Request{
 		ChaincodeID: "sacc",
 		Fcn:         "set",
-		Args: [][]byte{[]byte(tx.SNSN),
+		Args: [][]byte{[]byte(txID),
 			dataByte},
 	}
 	response, err = chClient.Execute(request)
@@ -103,6 +114,6 @@ func zkTx() {
 		logger.Error(err)
 		return
 	}
-	logger.Info("response: ", string(response.Payload))
+	logger.Info("response: ", string(response.TransactionID))
 
 }

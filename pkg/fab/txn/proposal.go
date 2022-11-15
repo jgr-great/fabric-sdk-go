@@ -63,22 +63,6 @@ func signProposal(ctx contextApi.Client, proposal *pb.Proposal) (*pb.SignedPropo
 	if err != nil {
 		return nil, errors.Wrap(err, "mashal proposal failed")
 	}
-	if testP := fab.GetTestProposal(); testP != nil {
-		proposalBytesTest, _ := proto.Marshal(testP)
-
-		signingMgr := ctx.SigningManager()
-		if signingMgr == nil {
-			return nil, errors.New("signing manager is nil")
-		}
-
-		signature, err := signingMgr.Sign(proposalBytes, ctx.PrivateKey())
-		if err != nil {
-			return nil, errors.WithMessage(err, "sign failed")
-		}
-
-		return &pb.SignedProposal{ProposalBytes: proposalBytesTest, Signature: signature}, nil
-
-	}
 
 	signingMgr := ctx.SigningManager()
 	if signingMgr == nil {

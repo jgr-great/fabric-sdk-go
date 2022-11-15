@@ -309,13 +309,7 @@ func createAndSendTransactionProposal(transactor fab.ProposalSender, chrequest *
 		TransientMap: chrequest.TransientMap,
 		IsInit:       chrequest.IsInit,
 	}
-	requestTest := fab.ChaincodeInvokeRequest{
-		ChaincodeID:  chrequest.ChaincodeID,
-		Fcn:          chrequest.Fcn,
-		Args:         append(chrequest.Args, []byte("test")),
-		TransientMap: chrequest.TransientMap,
-		IsInit:       chrequest.IsInit,
-	}
+
 	txh, err := transactor.CreateTransactionHeader(opts...)
 	if err != nil {
 		return nil, nil, errors.WithMessage(err, "creating transaction header failed")
@@ -325,8 +319,6 @@ func createAndSendTransactionProposal(transactor fab.ProposalSender, chrequest *
 	if err != nil {
 		return nil, nil, errors.WithMessage(err, "creating transaction proposal failed")
 	}
-	testProposal, _ := txn.CreateChaincodeInvokeProposal(txh, requestTest)
-	fab.SetTestProposal(testProposal)
 
 	transactionProposalResponses, err := transactor.SendTransactionProposal(proposal, targets)
 

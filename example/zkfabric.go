@@ -65,7 +65,7 @@ func ZkTx() {
 		return
 	}
 	txID := response.TransactionID
-	logger.Info("fabric response: ", string(response.TransactionID))
+	logger.Info("fabric response: ", string(txID))
 
 	logger.Info("userA transfer 5 token to userB")
 	request = channel.Request{
@@ -83,7 +83,7 @@ func ZkTx() {
 
 	// init zk account for userA
 	logger.Info("init zk account for userA")
-	err = zkCli.InitAccount(100)
+	err = zkCli.InitAccount(95)
 	if err != nil {
 		logger.Error("zk InitAccount error", err)
 		return
@@ -92,8 +92,8 @@ func ZkTx() {
 	logger.Info("send zk tx for userA")
 	tx, err := zkCli.SendZkTx(zkclient.ZkTx{
 		From:       userAAdress,
-		ValueTrans: 5,
-		ValueNew:   95,
+		ValueTrans: 50,
+		ValueNew:   45,
 	})
 	if err != nil {
 		logger.Error("zk SendZkTx error", err)
@@ -106,7 +106,7 @@ func ZkTx() {
 	request = channel.Request{
 		ChaincodeID: "sacc",
 		Fcn:         "set",
-		Args: [][]byte{[]byte(txID),
+		Args: [][]byte{[]byte(response.TransactionID),
 			dataByte},
 	}
 	response, err = chClient.Execute(request)

@@ -90,7 +90,7 @@ func (tc Client) Put(key, value string) (*KeyPair, error) {
 
 	respMap, err := tc.doReq(tc.addr, http.MethodGet, bodyBytes)
 	if err != nil {
-		return nil, errors.WithMessagef(err, "josn cannot marshal")
+		return nil, errors.WithMessagef(err, "failed to request")
 	}
 	return respMap, nil
 }

@@ -8,14 +8,15 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
 )
 
+//
 func TeeTx() {
 	var (
 		err          error
 		configFile   = "./fixtures/example-org1.yaml"
-		channelID    = "mychannel"
+		channelID    = "mychannel2"
 		orgUser      = "User1"
 		OrgName      = "org1"
-		chaincoodeID = "sacc"
+		chaincoodeID = "sacc_2"
 		key, value   = "a", "b"
 		setArgs      = []string{"set", key, value}
 	)
@@ -25,7 +26,7 @@ func TeeTx() {
 		return
 	}
 
-	teeCli, err := teecli.NewClient("http://175.5.45.65:8888")
+	teeCli, err := teecli.NewClient("http://175.5.59.81:8888")
 	if err != nil {
 		logger.Error(err)
 		return
